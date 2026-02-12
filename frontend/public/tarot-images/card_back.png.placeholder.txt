@@ -1,0 +1,81 @@
+# 塔罗牌背占位图说明 (Card Back Placeholder Image)
+
+**文件名**: card_back.png
+**目标尺寸**: 200x300 像素
+**目标大小**: 10-20 KB
+**用途**: 所有 78 张塔罗牌的统一牌背图像
+
+## 设计要求
+
+### 视觉元素
+- **神秘主题**: 深紫色/午夜蓝色背景
+- **金色装饰**: 边框或中心图案使用金色 (#d4af37)
+- **星空图案**: 可选的星星或宇宙元素
+- **简洁设计**: 不要过于复杂，保持优雅
+
+### 技术规格
+- **格式**: PNG（支持透明度）
+- **尺寸**: 200x300 像素（2:3 比例，与塔罗牌标准一致）
+- **文件大小**: 10-20 KB（优化后的加载性能）
+- **色彩空间**: sRGB
+- **透明度**: 可选，如果不使用透明度可使用 JPEG
+
+### 创建方法
+
+#### 选项 1: 使用设计工具
+1. 使用 Adobe Photoshop, GIMP, 或 Figma
+2. 创建 200x300 像素画布
+3. 添加深紫色背景 (#0f0a1e)
+4. 添加金色边框 (#d4af37)
+5. 添加中心图案（可选）
+6. 导出为 PNG，优化文件大小
+
+#### 选项 2: 使用在线工具
+- Canva: https://www.canva.com
+- Photopea: https://www.photopea.com (免费在线 Photoshop)
+- Remove.bg: 如果需要移除背景
+
+#### 选项 3: 使用 AI 生成
+```bash
+# 使用 DALL-E, Midjourney, 或 Stable Diffusion
+提示词: "A mystical tarot card back design with deep purple background,
+golden borders, and subtle star patterns, minimalist elegant style,
+200x300 pixels"
+```
+
+### 临时占位符方案
+
+如果暂时无法创建自定义牌背，可以使用以下临时方案：
+
+1. **纯色占位符**: 使用深紫色 (#0f0a1e) 的纯色图像
+2. **现有牌背**: 从网上搜索 royalty-free tarot card back images
+3. **简单图案**: 使用 CSS 渐变作为临时牌背（前端实现）
+
+### 集成位置
+
+- **前端**: `frontend/src/components/tarot/Card.tsx`
+- **使用场景**: 洗牌阶段、选牌阶段（牌背朝上时）
+- **加载状态**: 在牌面图像加载完成前显示牌背
+
+### 文件路径
+
+```
+F:\self_project\The_Observatory\Tarot\Tarot_card_images\card_back.png
+```
+
+### 优先级
+
+⚠️ **非阻塞任务**: 这个图像对于 MVP 不是必需的。
+- 前端可以先使用 CSS 样式作为临时牌背
+- 或者使用第一张牌的图像作为默认占位符
+- 后续迭代中添加正式的牌背图像
+
+### 参考资源
+
+- 塔罗牌背设计灵感: https://www.pinterest.com/search/pins/?q=tarot+card+back
+- 免费图库: Unsplash, Pexels（搜索 "mystical background"）
+- 图像优化工具: TinyPNG (https://tinypng.com)
+
+---
+
+**创建完成后**: 将此文件重命名为 `card_back.png` 并放置在 `Tarot_card_images/` 目录中。

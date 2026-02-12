@@ -1,0 +1,336 @@
+# MBTI 模块 API 契约
+# 模块: mbti
+# 版本: 1.0.0
+
+openapi: 3.1.0
+info:
+  title: MBTI API
+  description: AI 动态 MBTI 人格测试服务
+  version: 1.0.0
+
+paths:
+  /api/mbti/session/start:
+    post:
+      summary: 开始测试
+      description: 创建新的 MBTI 测试会话并获取第一道问题
+      operationId: startSession
+      tags: [MBTI]
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: 会话创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  /api/mbti/session/{session_id}/resume:
+    get:
+      summary: 恢复测试
+      description: 获取未完成的测试会话状态
+      operationId: resumeSession
+      tags: [MBTI]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '404':
+          description: 会话不存在或已完成
+
+  /api/mbti/session/{session_id}/answer:
+    post:
+      summary: 提交答案
+      description: 提交当前问题的答案并获取下一道问题
+      operationId: submitAnswer
+      tags: [MBTI]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+      responses:
+        '200':
+          description: 答案已记录
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/NextQuestionResponse'
+                  - $ref: '#/components/schemas/TestCompleteResponse'
+
+  /api/mbti/session/{session_id}/result:
+    get:
+      summary: 获取测试结果
+      description: 获取已完成测试的详细结果
+      operationId: getResult
+      tags: [MBTI]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MBTIResult'
+        '400':
+          description: 测试尚未完成
+
+  /api/mbti/types:
+    get:
+      summary: 获取所有人格类型
+      description: 返回 16 种 MBTI 人格类型的基本信息
+      operationId: getAllTypes
+      tags: [MBTI]
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MBTITypeInfo'
+
+  /api/mbti/types/{type_code}:
+    get:
+      summary: 获取人格类型详情
+      description: 获取指定人格类型的详细信息
+      operationId: getTypeDetail
+      tags: [MBTI]
+      parameters:
+        - name: type_code
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[EI][SN][TF][JP]$'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MBTITypeDetail'
+
+components:
+  schemas:
+    SessionResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [in_progress, completed]
+        question_count:
+          type: integer
+          description: 已回答的问题数
+        current_question:
+          $ref: '#/components/schemas/Question'
+        progress:
+          type: object
+          properties:
+            answered:
+              type: integer
+            estimated_remaining:
+              type: integer
+              description: 预计剩余问题数 (8-20题)
+
+    Question:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        question_text:
+          type: string
+          description: AI 动态生成的问题
+        question_type:
+          type: string
+          enum: [scenario, preference, agreement]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              text:
+                type: string
+
+    AnswerRequest:
+      type: object
+      required: [question_id, selected_option]
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        selected_option:
+          type: string
+          description: 选择的选项 ID
+
+    NextQuestionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [in_progress]
+        next_question:
+          $ref: '#/components/schemas/Question'
+        progress:
+          type: object
+
+    TestCompleteResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed]
+        result_type:
+          type: string
+          pattern: '^[EI][SN][TF][JP]$'
+        reading_id:
+          type: string
+          format: uuid
+          description: 关联的解读记录 ID
+
+    MBTIResult:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        personality_type:
+          type: string
+        type_name_zh:
+          type: string
+        type_name_en:
+          type: string
+        dimension_scores:
+          type: object
+          properties:
+            E:
+              type: integer
+            I:
+              type: integer
+            S:
+              type: integer
+            N:
+              type: integer
+            T:
+              type: integer
+            F:
+              type: integer
+            J:
+              type: integer
+            P:
+              type: integer
+        cognitive_functions:
+          type: array
+          items:
+            type: string
+          description: 认知功能栈 (如 Ni-Te-Fi-Se)
+        interpretation:
+          type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        weaknesses:
+          type: array
+          items:
+            type: string
+        career_matches:
+          type: array
+          items:
+            type: string
+        relationship_advice:
+          type: string
+        famous_people:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type: string
+
+    MBTITypeInfo:
+      type: object
+      properties:
+        type_code:
+          type: string
+        name_zh:
+          type: string
+        name_en:
+          type: string
+        brief_description:
+          type: string
+
+    MBTITypeDetail:
+      type: object
+      properties:
+        type_code:
+          type: string
+        name_zh:
+          type: string
+        name_en:
+          type: string
+        description:
+          type: string
+        cognitive_functions:
+          type: array
+          items:
+            type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        weaknesses:
+          type: array
+          items:
+            type: string
+        career_matches:
+          type: array
+          items:
+            type: string
+        famous_people:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

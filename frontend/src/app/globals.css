@@ -1,0 +1,906 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Ma+Shan+Zheng&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 复古神秘调色板 */
+  --background: #1a1d24;
+  --foreground: #e8e4dc;
+  --font-mystic: 'Cinzel', serif;
+  --font-mystic-zh: 'Ma Shan Zheng', cursive;
+  
+  /* 新增：有机材质变量 */
+  --color-parchment: #e8dcc4;
+  --color-brass: #b8956e;
+  --color-patina: #4a6b5a;
+  --color-rust: #a86a52;
+  --color-muted-purple: #7a6b91;
+  --color-deep-blue: #252a3b;
+  
+  /* 阴影变量 - 更柔和 */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 30px rgba(122, 107, 145, 0.2), 0 0 60px rgba(122, 107, 145, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1d24;
+    --foreground: #e8e4dc;
+  }
+}
+
+/* 强制暗黑模式 */
+html {
+  color-scheme: dark;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* 暗黑模式下的背景 - 更深沉的墨蓝 */
+.dark body,
+body {
+  background: 
+    radial-gradient(ellipse at 20% 30%, rgba(56, 47, 69, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(37, 42, 59, 0.5) 0%, transparent 50%),
+    linear-gradient(160deg, #0d0f12 0%, #1a1d24 40%, #171a26 70%, #0d0f12 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* 神秘风格字体 */
+.font-mystic {
+  font-family: var(--font-mystic), serif;
+}
+
+.font-mystic-zh {
+  font-family: var(--font-mystic-zh), cursive;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4c1d95;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6d28d9;
+}
+
+/* 星空背景效果 */
+.stars-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(2px 2px at 130px 80px, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.3), transparent);
+  background-size: 200px 200px;
+  animation: twinkle 5s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* 卡片悬浮效果 */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+}
+
+/* 按钮发光效果 */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+/* 塔罗牌翻转效果 */
+.tarot-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tarot-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* =============================================
+   有机边框与阴影系统 (T003)
+   ============================================= */
+
+/* 渐隐边框效果 - 替代硬边框 */
+.border-ethereal {
+  position: relative;
+  border: none !important;
+}
+
+.border-ethereal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(184, 149, 110, 0.3) 0%,
+    rgba(122, 107, 145, 0.2) 50%,
+    rgba(184, 149, 110, 0.15) 100%
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+.border-ethereal:hover::before {
+  opacity: 1;
+}
+
+/* 多层柔和阴影 */
+.shadow-mystic {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(26, 29, 36, 0.15),
+    0 0 40px rgba(122, 107, 145, 0.05);
+}
+
+.shadow-mystic-hover:hover {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    0 16px 40px rgba(26, 29, 36, 0.2),
+    0 0 60px rgba(122, 107, 145, 0.1);
+}
+
+/* 微弱内发光 */
+.glow-subtle {
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.03),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 呼吸感光晕 - 更柔和的版本 */
+.glow-breathe {
+  animation: breathe-glow 4s ease-in-out infinite;
+}
+
+@keyframes breathe-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(122, 107, 145, 0.1),
+      0 0 40px rgba(122, 107, 145, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(122, 107, 145, 0.15),
+      0 0 60px rgba(122, 107, 145, 0.08);
+  }
+}
+
+/* 神秘光晕效果 - 柔化版 */
+.mystic-glow {
+  position: relative;
+}
+
+.mystic-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg, 
+    rgba(122, 107, 145, 0.4), 
+    rgba(82, 93, 133, 0.3), 
+    rgba(184, 149, 110, 0.3), 
+    rgba(122, 107, 145, 0.4)
+  );
+  background-size: 400% 400%;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.4s ease;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.mystic-glow:hover::before {
+  opacity: 0.5;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 增强版神秘光晕 - 用于卡牌（柔化版） */
+.card-mystic-aura {
+  position: relative;
+}
+
+.card-mystic-aura::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 107, 145, 0.25) 0%,
+    rgba(82, 93, 133, 0.15) 40%,
+    transparent 70%
+  );
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  filter: blur(16px);
+  transition: opacity 0.5s ease;
+}
+
+.card-mystic-aura:hover::before {
+  opacity: 1;
+}
+
+/* 卡牌悬浮时的额外光环 */
+.card-mystic-aura::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    135deg,
+    rgba(184, 149, 110, 0.2) 0%,
+    rgba(122, 107, 145, 0.1) 50%,
+    rgba(184, 149, 110, 0.15) 100%
+  );
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card-mystic-aura:hover::after {
+  opacity: 0.6;
+}
+
+/* 金色流光描边 - 做旧黄铜版 */
+.gold-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.gold-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(184, 149, 110, 0) 35%,
+    rgba(184, 149, 110, 0.4) 50%,
+    rgba(184, 149, 110, 0) 65%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: shimmer-flow 5s ease-in-out infinite;
+  pointer-events: none;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+@keyframes shimmer-flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 能量场效果 - 柔和版 */
+.energy-field {
+  position: relative;
+}
+
+.energy-field::before,
+.energy-field::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.energy-field::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 107, 145, 0.15) 0%,
+    transparent 60%
+  );
+  animation: energy-pulse 3s ease-in-out infinite;
+}
+
+.energy-field::after {
+  border: 1px solid rgba(184, 149, 110, 0.15);
+  animation: energy-expand 3s ease-in-out infinite;
+}
+
+.energy-field:hover::before,
+.energy-field:hover::after {
+  opacity: 1;
+}
+
+@keyframes energy-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.03); opacity: 0.6; }
+}
+
+@keyframes energy-expand {
+  0%, 100% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.06); opacity: 0; }
+}
+
+/* 塔罗桌布纹理背景 - 天鹅绒质感 */
+.tarot-table {
+  position: relative;
+  background: 
+    radial-gradient(ellipse at 30% 30%, rgba(56, 47, 69, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 70%, rgba(37, 42, 59, 0.3) 0%, transparent 50%),
+    linear-gradient(160deg, #1a1d24 0%, #252a3b 50%, #1a1d24 100%);
+  border-radius: 20px 26px 22px 28px; /* 有机圆角 */
+  padding: 2rem;
+}
+
+.tarot-table::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* 细腻噪点纹理 - 模拟布料质感 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+  pointer-events: none;
+}
+
+.tarot-table::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* 微弱的十字纹理 */
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b8956e' fill-opacity='0.02'%3E%3Cpath d='M20 18v-4h-1v4h-4v1h4v4h1v-4h4v-1h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* 装饰边框 - 做旧黄铜 */
+.tarot-table-border {
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(
+      135deg, 
+      rgba(184, 149, 110, 0.25) 0%, 
+      rgba(122, 107, 145, 0.15) 25%,
+      rgba(154, 122, 84, 0.2) 50%,
+      rgba(122, 107, 145, 0.15) 75%,
+      rgba(184, 149, 110, 0.25) 100%
+    ) border-box;
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 卡牌悬浮光效 - 柔和版 */
+.card-glow-effect {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(122, 107, 145, 0.08);
+  transition: all 0.4s ease;
+}
+
+.card-glow-effect:hover {
+  box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.25),
+    0 6px 12px rgba(0, 0, 0, 0.2),
+    0 0 40px rgba(122, 107, 145, 0.15),
+    0 0 60px rgba(184, 149, 110, 0.08);
+}
+
+/* 金色边框动画 */
+.gold-border-anim {
+  position: relative;
+  overflow: hidden;
+}
+
+.gold-border-anim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.5), transparent) border-box;
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  animation: border-flow 2s linear infinite;
+}
+
+@keyframes border-flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 浮动粒子效果 */
+.floating-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float-up 8s ease-in-out infinite;
+}
+
+@keyframes float-up {
+  0%, 100% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(90vh) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(10vh) scale(1);
+  }
+  100% {
+    transform: translateY(0vh) scale(0);
+    opacity: 0;
+  }
+}
+
+/* 文字渐变效果 - 柔和版 */
+.text-gradient-mystic {
+  background: linear-gradient(135deg, #9585a8 0%, #b3a6c0 50%, #cec5d6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #c4a06a 0%, #b8956e 50%, #9a7a54 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==================== 金属与旧物质感 (T005) ==================== */
+
+/* 氧化金属渐变 - 绿锈/铜锈 */
+.metal-oxidized {
+  background: linear-gradient(
+    145deg,
+    #4a5a4a 0%,       /* 深绿锈 */
+    #5d6b5a 20%,      /* 中绿锈 */
+    #8a7355 40%,      /* 铜黄 */
+    #6b7a6a 60%,      /* 浅绿锈 */
+    #4d5d4d 80%,      /* 深绿锈 */
+    #3a4a3a 100%      /* 最深锈 */
+  );
+  position: relative;
+}
+
+.metal-oxidized::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 30%, rgba(107, 142, 107, 0.3) 0%, transparent 40%),
+    radial-gradient(ellipse at 70% 60%, rgba(184, 149, 110, 0.2) 0%, transparent 35%),
+    radial-gradient(ellipse at 40% 80%, rgba(90, 120, 90, 0.25) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+/* 做旧黄铜效果 - 不均匀反光 */
+.gold-antique {
+  background: linear-gradient(
+    160deg,
+    #7a6040 0%,
+    #9a7a54 15%,
+    #b8956e 30%,
+    #c4a06a 45%,
+    #b8956e 55%,
+    #8a6a45 70%,
+    #6a5035 85%,
+    #5a4028 100%
+  );
+  position: relative;
+}
+
+.gold-antique::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 25% 20%, rgba(255, 245, 220, 0.15) 0%, transparent 25%),
+    radial-gradient(ellipse at 75% 75%, rgba(255, 240, 200, 0.1) 0%, transparent 20%),
+    radial-gradient(ellipse at 50% 50%, rgba(90, 70, 40, 0.2) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* 铜绿锈迹叠加层 */
+.patina {
+  position: relative;
+}
+
+.patina::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 15% 25%, rgba(75, 120, 90, 0.4) 0%, transparent 30%),
+    radial-gradient(ellipse at 85% 15%, rgba(60, 100, 75, 0.3) 0%, transparent 25%),
+    radial-gradient(ellipse at 60% 80%, rgba(80, 130, 95, 0.35) 0%, transparent 28%),
+    radial-gradient(ellipse at 30% 70%, rgba(70, 110, 85, 0.25) 0%, transparent 22%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* 边框黄铜做旧效果 */
+.border-brass-antique {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(var(--tw-gradient-stops)) padding-box,
+    linear-gradient(
+      135deg, 
+      #6a5035 0%, 
+      #9a7a54 20%, 
+      #c4a06a 40%, 
+      #b8956e 60%, 
+      #8a6a45 80%, 
+      #5a4028 100%
+    ) border-box;
+  position: relative;
+}
+
+.border-brass-antique::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(75, 120, 90, 0.3) 0%, transparent 25%),
+    radial-gradient(ellipse at 80% 80%, rgba(60, 100, 75, 0.25) 0%, transparent 20%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* 金属高光流动 */
+.metal-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.metal-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 250, 230, 0.08) 45%,
+    rgba(255, 250, 230, 0.15) 50%,
+    rgba(255, 250, 230, 0.08) 55%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: metal-shine-flow 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes metal-shine-flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 输入框样式 - 柔和聚焦 */
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 1px rgba(122, 107, 145, 0.3),
+    0 0 12px rgba(122, 107, 145, 0.15);
+}
+
+/* 免责声明样式 */
+.disclaimer {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-left: 4px solid #fbbf24;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #fcd34d;
+}
+
+/* 流式文字显示效果 */
+.streaming-text {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 加载动画 */
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+/* 烟雾漂移动画 */
+@keyframes smoke-drift {
+  0%, 100% {
+    transform: translateX(0) scaleY(1);
+  }
+  25% {
+    transform: translateX(10px) scaleY(1.05);
+  }
+  50% {
+    transform: translateX(-5px) scaleY(0.95);
+  }
+  75% {
+    transform: translateX(5px) scaleY(1.02);
+  }
+}
+
+/* =============================================
+   有机材质纹理 (T004-T005)
+   ============================================= */
+
+/* 羊皮纸纹理背景 */
+.texture-parchment {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(232, 220, 196, 0.03) 0%,
+    rgba(232, 220, 196, 0.01) 100%
+  );
+}
+
+.texture-parchment::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* 做旧金属效果 */
+.metal-antique {
+  background: linear-gradient(
+    135deg,
+    #b8956e 0%,
+    #c4a06a 25%,
+    #9a7a54 50%,
+    #b8956e 75%,
+    #7d6346 100%
+  );
+  background-size: 200% 200%;
+}
+
+/* 氧化铜绿效果 */
+.patina-overlay {
+  position: relative;
+}
+
+.patina-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(74, 107, 90, 0.15) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 70% 80%,
+    rgba(74, 107, 90, 0.1) 0%,
+    transparent 40%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* 做旧黄铜边框 */
+.border-brass {
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(
+      135deg,
+      rgba(184, 149, 110, 0.4) 0%,
+      rgba(196, 160, 106, 0.6) 25%,
+      rgba(154, 122, 84, 0.3) 50%,
+      rgba(184, 149, 110, 0.5) 75%,
+      rgba(125, 99, 70, 0.4) 100%
+    ) border-box;
+}
+
+/* =============================================
+   排版装饰 (T009)
+   ============================================= */
+
+/* 首字下沉 */
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-mystic), serif;
+  font-size: 3.5em;
+  line-height: 0.8;
+  padding-right: 0.1em;
+  padding-top: 0.05em;
+  color: var(--color-brass);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 段落装饰分隔符 */
+.paragraph-divider {
+  text-align: center;
+  margin: 1.5em 0;
+  color: rgba(184, 149, 110, 0.5);
+  font-size: 0.875rem;
+  letter-spacing: 0.5em;
+}
+
+.paragraph-divider::before {
+  content: '✦ ✧ ✦';
+}
+
+/* 神秘引用块 */
+.quote-mystic {
+  position: relative;
+  padding: 1.5rem 2rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: rgba(232, 228, 220, 0.8);
+  border-left: 3px solid rgba(184, 149, 110, 0.4);
+  background: linear-gradient(
+    90deg,
+    rgba(122, 107, 145, 0.08) 0%,
+    transparent 100%
+  );
+}
+
+.quote-mystic::before {
+  content: '"';
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+  font-family: var(--font-mystic), serif;
+  font-size: 3rem;
+  color: rgba(184, 149, 110, 0.3);
+  line-height: 1;
+}
+
+/* =============================================
+   动态装饰元素 (T011)
+   ============================================= */
+
+/* 缓慢旋转的装饰 */
+.rotate-slow {
+  animation: slow-rotate 60s linear infinite;
+}
+
+@keyframes slow-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 轻微浮动 */
+.float-gentle {
+  animation: gentle-float 6s ease-in-out infinite;
+}
+
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 符号脉动 */
+.symbol-pulse {
+  animation: symbol-glow 3s ease-in-out infinite;
+}
+
+@keyframes symbol-glow {
+  0%, 100% { 
+    opacity: 0.6;
+    text-shadow: 0 0 4px currentColor;
+  }
+  50% { 
+    opacity: 1;
+    text-shadow: 0 0 12px currentColor;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* 有机圆角 - 不规则 */
+  .rounded-organic {
+    border-radius: 12px 18px 14px 20px;
+  }
+  
+  .rounded-organic-sm {
+    border-radius: 8px 12px 10px 14px;
+  }
+  
+  .rounded-organic-lg {
+    border-radius: 16px 24px 18px 26px;
+  }
+}

@@ -1,0 +1,224 @@
+# 塔罗牌模块 API 契约
+# 模块: tarot
+# 版本: 1.0.0
+
+openapi: 3.1.0
+info:
+  title: 塔罗牌 API
+  description: AI 塔罗牌解读服务
+  version: 1.0.0
+
+paths:
+  /api/tarot/cards:
+    get:
+      summary: 获取所有塔罗牌
+      description: 返回 78 张塔罗牌的元数据
+      operationId: getAllCards
+      tags: [塔罗牌]
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TarotCard'
+
+  /api/tarot/draw:
+    post:
+      summary: 抽牌
+      description: 根据牌阵类型随机抽取塔罗牌
+      operationId: drawCards
+      tags: [塔罗牌]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DrawRequest'
+      responses:
+        '200':
+          description: 抽牌成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DrawResponse'
+
+  /api/tarot/interpret:
+    post:
+      summary: AI 解读
+      description: 对抽取的牌进行 AI 解读 (流式响应)
+      operationId: interpretReading
+      tags: [塔罗牌]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretRequest'
+      responses:
+        '200':
+          description: 解读成功 (SSE 流式响应)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '429':
+          description: 5分钟内重复请求，返回缓存结果
+
+  /api/tarot/spreads:
+    get:
+      summary: 获取支持的牌阵
+      description: 返回所有支持的塔罗牌阵类型
+      operationId: getSpreads
+      tags: [塔罗牌]
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpreadInfo'
+
+components:
+  schemas:
+    TarotCard:
+      type: object
+      properties:
+        id:
+          type: integer
+        name_en:
+          type: string
+        name_zh:
+          type: string
+        short_code:
+          type: string
+        arcana:
+          type: string
+          enum: [major, minor]
+        suit:
+          type: string
+          enum: [wands, cups, swords, pentacles]
+          nullable: true
+        image_url:
+          type: string
+
+    DrawRequest:
+      type: object
+      required: [spread_type]
+      properties:
+        spread_type:
+          type: string
+          enum:
+            - single           # 单张 (1张)
+            - three_cards      # 时间之流 (3张)
+            - celtic_cross     # 凯尔特十字 (10张)
+            - two_options      # 二择一 (5张)
+            - love_relationship # 爱情关系 (7张)
+            - hexagram         # 六芒星 (7张)
+            - horseshoe        # 马蹄铁 (7张)
+
+    DrawResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        spread_type:
+          type: string
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/DrawnCard'
+
+    DrawnCard:
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/TarotCard'
+        position:
+          type: integer
+          description: 牌阵中的位置 (从1开始)
+        position_name:
+          type: string
+          description: 位置名称 (如"过去"、"现在"、"未来")
+        is_reversed:
+          type: boolean
+          description: 是否逆位
+
+    InterpretRequest:
+      type: object
+      required: [session_id]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        question:
+          type: string
+          maxLength: 500
+          description: 用户咨询的问题 (可选)
+
+    SpreadInfo:
+      type: object
+      properties:
+        type:
+          type: string
+        name_zh:
+          type: string
+        name_en:
+          type: string
+        card_count:
+          type: integer
+        description:
+          type: string
+        positions:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              name_zh:
+                type: string
+              name_en:
+                type: string
+
+    InterpretationResult:
+      type: object
+      properties:
+        interpretation:
+          type: string
+          description: AI 解读文本
+        summary:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        card_meanings:
+          type: array
+          items:
+            type: object
+            properties:
+              card_name:
+                type: string
+              position_meaning:
+                type: string
+              interpretation:
+                type: string
+        disclaimer:
+          type: string
+          default: 本内容纯属娱乐参考，不构成任何预测、建议或决策依据。
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

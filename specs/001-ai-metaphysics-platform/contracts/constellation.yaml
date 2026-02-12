@@ -1,0 +1,281 @@
+# 星座模块 API 契约
+# 模块: constellation
+# 版本: 1.0.0
+
+openapi: 3.1.0
+info:
+  title: 星座 API
+  description: 西方占星与星座运势 AI 解读服务
+  version: 1.0.0
+
+paths:
+  /api/constellation/zodiacs:
+    get:
+      summary: 获取所有星座
+      description: 返回 12 星座的基本信息
+      operationId: getAllZodiacs
+      tags: [星座]
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Zodiac'
+
+  /api/constellation/identify:
+    post:
+      summary: 识别星座
+      description: 根据生日识别太阳星座
+      operationId: identifyZodiac
+      tags: [星座]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [birth_month, birth_day]
+              properties:
+                birth_month:
+                  type: integer
+                  minimum: 1
+                  maximum: 12
+                birth_day:
+                  type: integer
+                  minimum: 1
+                  maximum: 31
+      responses:
+        '200':
+          description: 识别成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Zodiac'
+
+  /api/constellation/personality:
+    post:
+      summary: 星座性格分析
+      description: 获取星座性格 AI 解读 (流式响应)
+      operationId: getPersonality
+      tags: [星座]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalityRequest'
+      responses:
+        '200':
+          description: 解读成功 (SSE 流式响应)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/constellation/horoscope/daily:
+    get:
+      summary: 今日运势
+      description: 获取指定星座的今日运势
+      operationId: getDailyHoroscope
+      tags: [星座]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: zodiac
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoroscopeResult'
+
+  /api/constellation/horoscope/weekly:
+    get:
+      summary: 本周运势
+      description: 获取指定星座的本周运势
+      operationId: getWeeklyHoroscope
+      tags: [星座]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: zodiac
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoroscopeResult'
+
+  /api/constellation/compatibility:
+    post:
+      summary: 星座配对
+      description: 获取两个星座的配对分析
+      operationId: getCompatibility
+      tags: [星座]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [zodiac1, zodiac2]
+              properties:
+                zodiac1:
+                  type: string
+                zodiac2:
+                  type: string
+                analysis_type:
+                  type: string
+                  enum: [love, career, friendship]
+                  default: love
+      responses:
+        '200':
+          description: 配对分析成功 (SSE 流式响应)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/constellation/advanced:
+    post:
+      summary: 高级星盘分析
+      description: 计算月亮星座和上升星座
+      operationId: getAdvancedChart
+      tags: [星座]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvancedChartRequest'
+      responses:
+        '200':
+          description: 计算成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedChartResult'
+
+components:
+  schemas:
+    Zodiac:
+      type: object
+      properties:
+        id:
+          type: integer
+        name_en:
+          type: string
+        name_zh:
+          type: string
+        symbol:
+          type: string
+        element:
+          type: string
+          enum: [fire, earth, air, water]
+        quality:
+          type: string
+          enum: [cardinal, fixed, mutable]
+        ruling_planet:
+          type: string
+        date_range:
+          type: string
+          description: 日期范围描述
+
+    PersonalityRequest:
+      type: object
+      required: [zodiac]
+      properties:
+        zodiac:
+          type: string
+        include_moon:
+          type: boolean
+          default: false
+        moon_sign:
+          type: string
+        include_ascendant:
+          type: boolean
+          default: false
+        ascendant_sign:
+          type: string
+
+    HoroscopeResult:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        period:
+          type: string
+          enum: [daily, weekly]
+        date:
+          type: string
+          format: date
+        overall_score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        love_score:
+          type: integer
+        career_score:
+          type: integer
+        health_score:
+          type: integer
+        lucky_number:
+          type: integer
+        lucky_color:
+          type: string
+        interpretation:
+          type: string
+        disclaimer:
+          type: string
+
+    AdvancedChartRequest:
+      type: object
+      required: [birth_date, birth_time, birth_place]
+      properties:
+        birth_date:
+          type: string
+          format: date
+        birth_time:
+          type: string
+          pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+          description: 出生时间 (HH:MM)
+        birth_place:
+          type: string
+          description: 出生地 (城市名或经纬度)
+
+    AdvancedChartResult:
+      type: object
+      properties:
+        sun_sign:
+          type: string
+        moon_sign:
+          type: string
+        ascendant_sign:
+          type: string
+        interpretation:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
