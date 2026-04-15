@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, ReactNode } from 'react';
+import { useRef, ReactNode } from 'react';
 import { motion, useInView, Variants } from 'framer-motion';
 
 type RevealEffect = 'fadeUp' | 'fadeIn' | 'scaleIn' | 'slideLeft' | 'slideRight' | 'blur';

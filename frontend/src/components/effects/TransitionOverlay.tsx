@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { PageTransition } from './PageTransition';
 import { useTransitionStore } from '@/lib/transition-store';
 
@@ -10,7 +9,6 @@ import { useTransitionStore } from '@/lib/transition-store';
  * 监听路由变化并触发转场动画
  */
 export function TransitionOverlay() {
-  const pathname = usePathname();
   const { 
     isTransitioning, 
     transitionType, 

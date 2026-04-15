@@ -37,7 +37,7 @@ export default function RegisterPage() {
     try {
       await register(email, password);
       router.push('/tarot');
-    } catch (err) {
+    } catch {
       // 错误已在 store 中处理
     }
   };

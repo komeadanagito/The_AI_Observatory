@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,12 +9,10 @@ import { useAuthStore, useRequireAuth } from '@/lib/auth';
 import { tarotApi, SpreadInfo, DrawCardResponse, TarotCardInfo } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { TarotCardDisplay, TarotCardItem } from '@/components/tarot/card-display';
+import { TarotCardDisplay } from '@/components/tarot/card-display';
 import { MysticDivider } from '@/components/ui/MysticFrame';
 import { ShuffleAnimation } from '@/components/tarot/ShuffleAnimation';
 import { CardSelection } from '@/components/tarot/CardSelection';
-import { StaggeredReveal } from '@/components/effects/RevealOnScroll';
-import { usePageTransition } from '@/lib/transition-store';
 
 /**
  * 交互阶段
@@ -26,7 +24,7 @@ type InteractionPhase =
   | 'revealing'         // 逐张揭牌
   | 'complete';         // 完成，可解读
 
-export default function TarotPage() {
+function TarotPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout } = useAuthStore();
@@ -489,6 +487,32 @@ export default function TarotPage() {
         </AnimatePresence>
       </main>
     </div>
+  );
+}
+
+export default function TarotPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <motion.div
+              className="text-5xl mb-4"
+              animate={{
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🔮
+            </motion.div>
+            <p className="text-gray-400">加载塔罗牌中...</p>
+          </div>
+        </div>
+      }
+    >
+      <TarotPageContent />
+    </Suspense>
   );
 }
 

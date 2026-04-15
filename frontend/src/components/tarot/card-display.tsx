@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { DrawnCard, SpreadPosition } from '@/lib/api';
 import { CardRevealGlow } from '@/components/effects/CardRevealParticles';
 import { organicBorderRadius, randomRotation } from '@/lib/organic-utils';
@@ -334,6 +334,7 @@ function TarotCardItem({ drawnCard, position, index, showCards, size = 'md', hid
   const [imageStatus, setImageStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [isHovered, setIsHovered] = useState(false);
   const [wasJustRevealed, setWasJustRevealed] = useState(false);
+  const sizeConfig = getSizeClasses(size);
   
   // 有机样式 - 基于卡牌 ID 生成一致的随机偏移
   const organicStyle = useMemo(() => {
@@ -343,10 +344,8 @@ function TarotCardItem({ drawnCard, position, index, showCards, size = 'md', hid
       borderRadius: organicBorderRadius(seed, 12, 3),
     };
   }, [drawnCard?.card_id, index]);
-  
-  if (!drawnCard) return <div className={getSizeClasses(size).container} />;
-  
-  const imageFilename = drawnCard.card.image_filename;
+
+  const imageFilename = drawnCard?.card.image_filename ?? '';
   const imageUrl = imageFilename ? `${CARD_IMAGE_BASE}/${imageFilename}` : '';
 
   // 预加载图片
@@ -377,7 +376,7 @@ function TarotCardItem({ drawnCard, position, index, showCards, size = 'md', hid
     }
   }, [showCards]);
 
-  const sizeConfig = getSizeClasses(size);
+  if (!drawnCard) return <div className={sizeConfig.container} />;
 
   return (
     <motion.div
@@ -644,7 +643,7 @@ function getSizeClasses(size: 'sm' | 'md' | 'lg'): SizeConfig {
   }
 }
 
-function getSuitEmoji(suit?: string): string {
+function getSuitEmoji(suit?: string | null): string {
   switch (suit) {
     case 'wands': return '🪄';
     case 'cups': return '🏆';

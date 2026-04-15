@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { usePageTransition } from '@/lib/transition-store';
-import { StaggeredReveal } from '@/components/effects/RevealOnScroll';
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuthStore();

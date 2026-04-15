@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface CardSelectionProps {
   /** 总牌数 */
@@ -160,7 +160,6 @@ export function CardSelection({
                       isSelected={isSelected} 
                       selectionOrder={selectionOrder}
                       isDisabled={!isSelected && isSelectionComplete}
-                      positionName={positionNames[selectionOrder - 1]}
                     />
                   </motion.div>
                 );
@@ -197,7 +196,6 @@ export function CardSelection({
                     isSelected={isSelected} 
                     selectionOrder={selectionOrder}
                     isDisabled={!isSelected && isSelectionComplete}
-                    positionName={positionNames[selectionOrder - 1]}
                     size="sm"
                   />
                 </motion.div>
@@ -265,13 +263,11 @@ function SelectableCard({
   isSelected,
   selectionOrder,
   isDisabled,
-  positionName,
   size = 'md',
 }: {
   isSelected: boolean;
   selectionOrder: number;
   isDisabled: boolean;
-  positionName?: string;
   size?: 'sm' | 'md';
 }) {
   return (

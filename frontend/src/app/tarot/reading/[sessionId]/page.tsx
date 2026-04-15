@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/lib/auth';
-import { tarotApi, getAccessToken } from '@/lib/api';
+import { tarotApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ParchmentTexture } from '@/components/effects/ParchmentTexture';
@@ -117,8 +117,8 @@ export default function ReadingPage() {
             }
           }
         }
-      } catch (err: any) {
-        setError(err.message || '获取解读失败，请稍后重试');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : '获取解读失败，请稍后重试');
         setIsLoading(false);
       } finally {
         fetchingRef.current = false;
