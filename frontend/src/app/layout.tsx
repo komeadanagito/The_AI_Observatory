@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { WebGLStarfield } from "@/components/effects/WebGLStarfield";
-import { CSSParticles } from "@/components/effects/CSSStarfield";
+import { AmbientBackground } from "@/components/effects/AmbientBackground";
 import { TransitionOverlay } from "@/components/effects/TransitionOverlay";
 
 const geistSans = localFont({
@@ -35,11 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <Providers>
-          {/* WebGL 星空背景 - 真正 GPU 渲染，最佳性能 */}
-          <WebGLStarfield starCount={120} />
-          
-          {/* CSS 漂浮尘埃 - 营造古老空间氛围 */}
-          <CSSParticles particleCount={12} />
+          <AmbientBackground />
           
           {/* 全局转场遮罩 */}
           <TransitionOverlay />

@@ -21,10 +21,10 @@ export function Card({
   ...props 
 }: CardProps) {
   const variants = {
-    default: 'bg-dark-800/40 backdrop-blur-sm border-ethereal texture-parchment',
-    glow: 'bg-dark-800/40 backdrop-blur-sm shadow-mystic glow-breathe border-ethereal',
-    bordered: 'bg-dark-800/30 backdrop-blur-sm border-brass',
-    parchment: 'bg-gradient-to-br from-parchment-300/5 to-parchment-400/3 backdrop-blur-sm border-ethereal texture-parchment',
+    default: 'luxury-panel border-ethereal',
+    glow: 'luxury-panel shadow-mystic border-ethereal',
+    bordered: 'luxury-panel-soft brass-hairline',
+    parchment: 'bg-[linear-gradient(180deg,rgba(34,27,20,0.50),rgba(19,17,14,0.66))] backdrop-blur-sm border-ethereal texture-parchment',
   };
 
   // 生成有机样式
@@ -41,11 +41,11 @@ export function Card({
       className={`
         rounded-organic p-6
         ${variants[variant]}
-        ${hover ? 'shadow-mystic-hover cursor-pointer transition-shadow duration-400' : ''}
+        ${hover ? 'shadow-mystic-hover cursor-pointer transition-shadow duration-400 card-hover' : ''}
         ${className}
       `}
       style={organicStyle}
-      initial={{ opacity: 0, y: 16 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       {...props}

@@ -8,10 +8,11 @@ import { useRequireAuth } from '@/lib/auth';
 import { tarotApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { FullscreenLoader } from '@/components/ui/FullscreenLoader';
 import { ParchmentTexture } from '@/components/effects/ParchmentTexture';
 import { RevealOnScroll } from '@/components/effects/RevealOnScroll';
 import { MysticDivider } from '@/components/ui/MysticFrame';
-import { CrystalBallIcon, BackArrowIcon, LoadingIcon } from '@/components/icons/MysticIcons';
+import { CrystalBallIcon, BackArrowIcon } from '@/components/icons/MysticIcons';
 
 export default function ReadingPage() {
   const params = useParams();
@@ -28,28 +29,89 @@ export default function ReadingPage() {
   const [isComplete, setIsComplete] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
-  // 防止重复请求的标记
-  const fetchingRef = useRef(false);
-  const hasStartedRef = useRef(false);
+  const lastRequestKeyRef = useRef<string | null>(null);
 
   // 获取 AI 解读（流式）
   useEffect(() => {
-    // 防止 React 严格模式下的重复请求
     if (!sessionId || !isReady) return;
-    if (hasStartedRef.current) return;
-    hasStartedRef.current = true;
+
+    const requestKey = `${sessionId}::${question ?? ''}`;
+    if (lastRequestKeyRef.current === requestKey) {
+      return;
+    }
+
+    lastRequestKeyRef.current = requestKey;
+    let isCancelled = false;
+    let resultPollTimer: number | null = null;
+    let syncFallbackTimer: number | null = null;
+
+    const stopPolling = () => {
+      if (resultPollTimer !== null) {
+        window.clearInterval(resultPollTimer);
+        resultPollTimer = null;
+      }
+    };
+
+    const stopSyncFallback = () => {
+      if (syncFallbackTimer !== null) {
+        window.clearTimeout(syncFallbackTimer);
+        syncFallbackTimer = null;
+      }
+    };
+
+    const startPolling = () => {
+      stopPolling();
+      resultPollTimer = window.setInterval(async () => {
+        if (isCancelled) {
+          stopPolling();
+          return;
+        }
+
+        try {
+          const result = await tarotApi.getInterpretationResult(sessionId);
+          if (result.ready && result.interpretation) {
+            setInterpretation(result.interpretation);
+            setIsComplete(true);
+            setIsLoading(false);
+            stopPolling();
+          }
+        } catch {
+          // 轮询兜底不阻断主流程
+        }
+      }, 2000);
+    };
 
     const fetchInterpretation = async () => {
-      // 如果已经在请求中，跳过
-      if (fetchingRef.current) return;
-      fetchingRef.current = true;
-      
       setIsLoading(true);
       setError(null);
       setInterpretation('');
+      setIsComplete(false);
+      startPolling();
+      syncFallbackTimer = window.setTimeout(async () => {
+        if (isCancelled) {
+          return;
+        }
+
+        try {
+          const fallback = await tarotApi.interpretSync(sessionId, question);
+          if (!isCancelled && fallback.interpretation) {
+            setInterpretation(fallback.interpretation);
+            setIsComplete(true);
+            setIsLoading(false);
+            stopPolling();
+            stopSyncFallback();
+          }
+        } catch {
+          // 超时兜底不覆盖原始错误，由主流程处理
+        }
+      }, 35000);
 
       try {
         const response = await tarotApi.interpret(sessionId, question);
+
+        if (isCancelled) {
+          return;
+        }
         
         if (!response.ok) {
           const data = await response.json();
@@ -60,9 +122,11 @@ export default function ReadingPage() {
         const contentType = response.headers.get('content-type');
         if (contentType?.includes('application/json')) {
           const data = await response.json();
-          setInterpretation(data.interpretation);
-          setIsComplete(true);
-          setIsLoading(false);
+          if (!isCancelled) {
+            setInterpretation(data.interpretation);
+            setIsComplete(true);
+            setIsLoading(false);
+          }
           return;
         }
 
@@ -75,63 +139,113 @@ export default function ReadingPage() {
         }
 
         let streamDone = false;
+        let buffer = '';
+        let receivedContent = false;
+
+        const processEventBlock = (block: string) => {
+          const lines = block.split(/\r?\n/);
+          let eventType = 'message';
+          const dataLines: string[] = [];
+
+          for (const line of lines) {
+            if (line.startsWith('event:')) {
+              eventType = line.slice(6).trim();
+              continue;
+            }
+
+            if (line.startsWith('data:')) {
+              dataLines.push(line.slice(5).trimStart());
+            }
+          }
+
+          const dataStr = dataLines.join('\n').trim();
+          if (!dataStr) {
+            return;
+          }
+
+          try {
+            const data = JSON.parse(dataStr);
+
+            if (eventType === 'done' || data.done) {
+              streamDone = true;
+              if (!isCancelled) {
+                setIsComplete(true);
+                setIsLoading(false);
+              }
+              stopPolling();
+              stopSyncFallback();
+              return;
+            }
+
+            if (!isCancelled && data.content) {
+              receivedContent = true;
+              setInterpretation((prev) => prev + data.content);
+            }
+          } catch {
+            // 保留容错：忽略无法解析的事件块
+          }
+        };
         
         while (!streamDone) {
           const { done, value } = await reader.read();
           
           if (done) {
-            setIsComplete(true);
-            setIsLoading(false);
+            const remaining = buffer.trim();
+            if (remaining) {
+              processEventBlock(remaining);
+            }
+
+            if (!receivedContent && !isCancelled) {
+              const fallback = await tarotApi.interpretSync(sessionId, question);
+              if (fallback.interpretation) {
+                setInterpretation(fallback.interpretation);
+                setIsComplete(true);
+                setIsLoading(false);
+                stopPolling();
+                stopSyncFallback();
+                break;
+              }
+            }
+
+            if (!isCancelled) {
+              setIsComplete(true);
+              setIsLoading(false);
+            }
+            stopPolling();
+            stopSyncFallback();
             break;
           }
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-          
-          for (const line of lines) {
-            // 跳过事件类型行
-            if (line.startsWith('event:')) continue;
-            
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6).trim();
-              if (!dataStr) continue;
-              
-              try {
-                const data = JSON.parse(dataStr);
-                
-                // 检查是否完成
-                if (data.done) {
-                  streamDone = true;
-                  setIsComplete(true);
-                  setIsLoading(false);
-                  break;
-                }
-                
-                // 追加内容
-                if (data.content) {
-                  setInterpretation((prev) => prev + data.content);
-                }
-              } catch {
-                // 忽略无法解析的数据（如空行）
-              }
+          buffer += decoder.decode(value, { stream: true });
+
+          const events = buffer.split(/\r?\n\r?\n/);
+          buffer = events.pop() ?? '';
+
+          for (const eventBlock of events) {
+            processEventBlock(eventBlock);
+            if (streamDone) {
+              break;
             }
           }
         }
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : '获取解读失败，请稍后重试');
-        setIsLoading(false);
-      } finally {
-        fetchingRef.current = false;
+        if (!isCancelled) {
+          setError(err instanceof Error ? err.message : '获取解读失败，请稍后重试');
+          setIsLoading(false);
+        }
+        stopPolling();
+        stopSyncFallback();
       }
     };
 
     fetchInterpretation();
-    
-    // 清理函数：组件卸载时允许下次重新请求
+
     return () => {
-      // 不重置 hasStartedRef，避免严格模式下重复执行
+      isCancelled = true;
+      stopPolling();
+      stopSyncFallback();
     };
-  }, [sessionId, isReady]); // 移除 question 依赖，避免 URL 参数变化触发重新请求
+  }, [sessionId, isReady, question]);
 
   // 自动滚动到底部
   useEffect(() => {
@@ -142,14 +256,7 @@ export default function ReadingPage() {
 
   // 等待认证状态确定
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <LoadingIcon size={48} className="text-gold-500/70 mx-auto mb-4" />
-          <p className="text-parchment-400">加载中...</p>
-        </div>
-      </div>
-    );
+    return <FullscreenLoader label="正在连接本次塔罗解读..." />;
   }
 
   if (!isReady) {
@@ -224,13 +331,10 @@ export default function ReadingPage() {
                 className="prose prose-invert max-w-none overflow-y-auto max-h-[60vh]"
               >
                 {interpretation ? (
-                  <RevealOnScroll effect="fadeIn" duration={0.8}>
-                    <div className="whitespace-pre-wrap text-parchment-300 leading-relaxed streaming-text font-serif">
-                      {/* 首字下沉效果 */}
-                      <span className="drop-cap">{interpretation.charAt(0)}</span>
-                      {interpretation.slice(1)}
-                    </div>
-                  </RevealOnScroll>
+                  <div className="whitespace-pre-wrap text-parchment-300 leading-relaxed streaming-text font-serif">
+                    <span className="drop-cap">{interpretation.charAt(0)}</span>
+                    {interpretation.slice(1)}
+                  </div>
                 ) : isLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <div className="text-center">

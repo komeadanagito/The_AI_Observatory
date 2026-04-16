@@ -136,3 +136,4 @@ npm-debug.log*
 *.tmp
 *.temp
 *.bak
+.worktrees/

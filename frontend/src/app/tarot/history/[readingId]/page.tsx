@@ -9,6 +9,7 @@ import { tarotApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { TarotCardDisplay } from '@/components/tarot/card-display';
+import { FullscreenLoader } from '@/components/ui/FullscreenLoader';
 
 export default function HistoryDetailPage() {
   const params = useParams();
@@ -25,14 +26,7 @@ export default function HistoryDetailPage() {
   });
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-float">🔮</div>
-          <p className="text-gray-400">加载中...</p>
-        </div>
-      </div>
-    );
+    return <FullscreenLoader label="正在展开这次解读的卷轴..." />;
   }
 
   if (!isReady) {

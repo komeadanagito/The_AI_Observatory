@@ -9,6 +9,7 @@ import { useAuthStore, useRequireAuth } from '@/lib/auth';
 import { tarotApi, SpreadInfo, DrawCardResponse, TarotCardInfo } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { FullscreenLoader } from '@/components/ui/FullscreenLoader';
 import { TarotCardDisplay } from '@/components/tarot/card-display';
 import { MysticDivider } from '@/components/ui/MysticFrame';
 import { ShuffleAnimation } from '@/components/tarot/ShuffleAnimation';
@@ -191,23 +192,7 @@ function TarotPageContent() {
 
   // 等待认证状态确定
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <motion.div 
-            className="text-5xl mb-4"
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            🔮
-          </motion.div>
-          <p className="text-gray-400">加载中...</p>
-        </div>
-      </div>
-    );
+    return <FullscreenLoader label="正在进入塔罗仪式空间..." />;
   }
 
   if (!isReady) {

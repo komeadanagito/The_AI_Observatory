@@ -19,19 +19,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     children, 
     ...props 
   }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-organic-sm transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-mystic';
+    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-organic-sm transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-mystic tracking-[0.02em]';
     
     const variants = {
-      primary: 'bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-400 hover:to-primary-600 text-white/95 border border-primary-400/20 glow-breathe',
-      secondary: 'bg-gradient-to-br from-mystic-600 to-mystic-800 hover:from-mystic-500 hover:to-mystic-700 text-white/90 border border-mystic-500/20',
-      outline: 'border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 hover:border-gold-400/60 backdrop-blur-sm',
+      primary: 'bg-[linear-gradient(180deg,rgba(184,149,110,0.28),rgba(104,75,39,0.92))] text-[#f4eadb] border border-[#b8956e]/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(0,0,0,0.28)] hover:border-[#d6ba8b]/50 hover:text-white',
+      secondary: 'bg-[linear-gradient(180deg,rgba(31,36,52,0.92),rgba(15,18,28,0.92))] text-parchment-200 border border-white/8 hover:border-[#b8956e]/28 hover:bg-[linear-gradient(180deg,rgba(38,44,64,0.95),rgba(16,19,29,0.95))]',
+      outline: 'border border-[#b8956e]/35 text-[#d6c0a0] bg-black/10 hover:bg-[#b8956e]/8 hover:border-[#d2b387]/50 backdrop-blur-sm',
       ghost: 'text-parchment-300 hover:bg-white/5 hover:text-parchment-200',
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'px-3.5 py-2 text-sm',
+      md: 'px-5 py-2.5 text-[15px]',
+      lg: 'px-7 py-3.5 text-base',
     };
 
     return (
@@ -39,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
         disabled={disabled || isLoading}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
+        whileHover={{ scale: disabled || isLoading ? 1 : 1.015, y: disabled || isLoading ? 0 : -1 }}
         whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
         {...props}
       >

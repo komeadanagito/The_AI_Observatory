@@ -8,6 +8,7 @@ import { useRequireAuth } from '@/lib/auth';
 import { tarotApi, ReadingHistoryItem } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { FullscreenLoader } from '@/components/ui/FullscreenLoader';
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -37,14 +38,7 @@ export default function HistoryPage() {
   };
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-float">🔮</div>
-          <p className="text-gray-400">加载中...</p>
-        </div>
-      </div>
-    );
+    return <FullscreenLoader label="正在翻阅你的占卜记录..." />;
   }
 
   if (!isReady) {

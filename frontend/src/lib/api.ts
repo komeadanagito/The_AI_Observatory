@@ -87,6 +87,60 @@ export interface ReadingHistoryDetail {
   disclaimer?: string;
 }
 
+export interface MBTIOption {
+  id: string;
+  text: string;
+  weight: Record<string, number>;
+}
+
+export interface MBTIQuestion {
+  question_id: string;
+  question_text: string;
+  question_type: 'scenario' | 'preference' | 'agreement';
+  dimension: 'EI' | 'SN' | 'TF' | 'JP';
+  options: MBTIOption[];
+}
+
+export interface MBTIProgress {
+  answered: number;
+  min_questions: number;
+  max_questions: number;
+  estimated_remaining: number;
+}
+
+export interface MBTIResult {
+  session_id: string;
+  personality_type: string;
+  type_name_zh: string;
+  type_name_en: string;
+  summary: string;
+  cognitive_functions: string[];
+  strengths: string[];
+  weaknesses: string[];
+  career_matches: string[];
+  relationship_advice: string;
+  famous_people: string[];
+  dimension_scores: Record<string, number>;
+  disclaimer: string;
+}
+
+export interface MBTISessionState {
+  session_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  question_count: number;
+  current_question?: MBTIQuestion | null;
+  progress: MBTIProgress;
+  completed_result?: MBTIResult | null;
+}
+
+export interface MBTITypeInfo {
+  type_code: string;
+  type_name_zh: string;
+  type_name_en: string;
+  summary: string;
+  cognitive_functions: string[];
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'DELETE';
   body?: unknown;
@@ -299,6 +353,28 @@ export const tarotApi = {
     );
   },
 
+  interpretSync(
+    sessionId: string,
+    question?: string,
+  ): Promise<{ cached?: boolean; interpretation: string; disclaimer?: string }> {
+    return apiRequest<{ cached?: boolean; interpretation: string; disclaimer?: string }>('/tarot/interpret/sync', {
+      method: 'POST',
+      auth: true,
+      body: {
+        session_id: sessionId,
+        question,
+      },
+    });
+  },
+
+  getInterpretationResult(
+    sessionId: string,
+  ): Promise<{ ready: boolean; interpretation?: string; disclaimer?: string }> {
+    return apiRequest<{ ready: boolean; interpretation?: string; disclaimer?: string }>(`/tarot/interpret/result/${sessionId}`, {
+      auth: true,
+    });
+  },
+
   getHistory(page = 1, pageSize = 20): Promise<ReadingHistoryListResponse> {
     return apiRequest<ReadingHistoryListResponse>(`/tarot/history?page=${page}&page_size=${pageSize}`, {
       auth: true,
@@ -314,5 +390,45 @@ export const tarotApi = {
       method: 'DELETE',
       auth: true,
     });
+  },
+};
+
+export const mbtiApi = {
+  startSession(): Promise<MBTISessionState> {
+    return apiRequest<MBTISessionState>('/mbti/session/start', {
+      method: 'POST',
+      auth: true,
+    });
+  },
+
+  resumeSession(sessionId: string): Promise<MBTISessionState> {
+    return apiRequest<MBTISessionState>(`/mbti/session/${sessionId}/resume`, {
+      auth: true,
+    });
+  },
+
+  submitAnswer(sessionId: string, questionId: string, selectedOption: string): Promise<{ status: 'running'; next_question: MBTIQuestion; progress: MBTIProgress } | { status: 'completed'; result: MBTIResult }> {
+    return apiRequest<{ status: 'running'; next_question: MBTIQuestion; progress: MBTIProgress } | { status: 'completed'; result: MBTIResult }>(`/mbti/session/${sessionId}/answer`, {
+      method: 'POST',
+      auth: true,
+      body: {
+        question_id: questionId,
+        selected_option: selectedOption,
+      },
+    });
+  },
+
+  getResult(sessionId: string): Promise<MBTIResult> {
+    return apiRequest<MBTIResult>(`/mbti/session/${sessionId}/result`, {
+      auth: true,
+    });
+  },
+
+  getTypes(): Promise<MBTITypeInfo[]> {
+    return apiRequest<MBTITypeInfo[]>('/mbti/types');
+  },
+
+  getTypeDetail(typeCode: string): Promise<MBTITypeInfo> {
+    return apiRequest<MBTITypeInfo>(`/mbti/types/${typeCode}`);
   },
 };
